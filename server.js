@@ -1,11 +1,22 @@
 const dotenv = require('dotenv');
 dotenv.config();
-const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const os = require('os');
+const mqttClient = require('./utils/mqttClient');
+
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server,{
+  cors: {
+    origin: "*", // Allow all origins or specify your frontend URL
+    methods: ["GET", "POST"]
+  }}
+);
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -26,11 +37,31 @@ function getIPAddress() {
   }
   return '0.0.0.0';
 }
+mqttClient.subscribe('espheater/livedata');
+mqttClient.on('message',(topic,message)=>{
+  if(topic === 'espheater/livedata')
+  {
+    console.log(message.toString());
+    try {
+      const parsedData = JSON.parse(message.toString());
+      console.log("After Parse: ",parsedData);
+      io.emit("livedata",parsedData);
+    } catch (error) {
+      console.log("Error : ",error);
+    }
+  }
+})
 
 // Routes
-const deviceRoute = require('./routes/DeviceRoute')();
+const deviceRoute = require('./routes/DeviceRoute');
 app.use('/api', deviceRoute);
 
-app.listen(PORT, () => {
+io.on('connection',(socket)=>{
+  console.log("New Device : ",socket.id);
+  
+})
+
+
+server.listen(PORT, () => {
   console.log(`✅ Server running on http://${getIPAddress()}:${PORT}`);
 });
