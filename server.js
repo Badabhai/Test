@@ -22,8 +22,13 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Routes
+const deviceRoute = require('./routes/DeviceRoute');
+app.use('/api', deviceRoute);
+
 // app.use(express.static(path.join(__dirname, 'Frontend/Sensewell_SBC/dist')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Function to get server IP
 function getIPAddress() {
@@ -52,9 +57,7 @@ mqttClient.on('message',(topic,message)=>{
   }
 })
 
-// Routes
-const deviceRoute = require('./routes/DeviceRoute');
-app.use('/api', deviceRoute);
+
 
 io.on('connection',(socket)=>{
   console.log("New Device : ",socket.id);
