@@ -7,4 +7,4 @@ const { setTemperature,setControl } = require('../controller/espController')
 router.post('/setSV',setTemperature);
 router.post('/control',setControl);
 
-module.exports = () => router;
+module.exports = router;
