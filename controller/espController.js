@@ -8,7 +8,7 @@ const setTemperature = async(req,res) => {
     const sv=req?.body?.sv;
     console.log("SV: ",sv);
     mqttClient.subscribe('espheater/setsv/resp');
-    mqttClient.publish('espheater/setsv',sv,(err)=>{
+    mqttClient.publish('espheater/setsv',sv,(err)=>{    
         if(err)
         {
             if(!responseReceived){
