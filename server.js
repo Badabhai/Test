@@ -101,14 +101,27 @@ mqttClient.on('message',async(topic,message)=>{
       const parsedData = JSON.parse(message.toString());
       console.log("After Parse: ",parsedData);
       io.emit("livedata",parsedData);
+      let pressureValue = parsedData.pressure;
+      let weightValue = parsedData.weight;
+      if(parsedData.pressure < 0)
+      {
+        pressureValue = parsedData.pressure * (-1);
+        console.log("Low P",pressureValue);
+      }
+
+      if(parsedData.weight < 0)
+        {
+          weightValue = parsedData.weight * (-1);
+          console.log("Low W",weightValue);
+        }
 
       // Save to MongoDB
       const newEntry = new Report({
         dateTime: new Date(),
         PV: parsedData?.pv,
         SV: parsedData?.sv,
-        Pressure: parsedData?.pressure,
-        Weight: parsedData?.weight,
+        Pressure: pressureValue,
+        Weight: weightValue/1000,
         // dateTime will be set automatically
       });
 
